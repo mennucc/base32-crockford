@@ -38,8 +38,10 @@ __all__ = ["encode", "decode", "normalize"]
 
 if PY3:
     string_types = str,
+    int_types = int,
 else:
     string_types = basestring,
+    int_types = (int,long)
 
 # The encoded symbol space does not include I, L, O or U
 symbols = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
@@ -64,6 +66,12 @@ def encode(number, checksum=False, split=0):
     If `checksum` is set to True, a check symbol will be
     calculated and appended to the string.
 
+    The check symbol is the encoding of the remainder of `number`
+    divided by 37. If `checksum` is set to a positive integer,
+    then this integer will be used as divisor, instead of 37.
+    If the ouput is to be used in contexts where only alphanumeric
+    characters are safe (such as http transactions, URIs, databases..)
+    then a value of 31 is recommended.
 
     If `split` is specified, the string will be divided into
     clusters of that size separated by hyphens.
@@ -80,7 +88,12 @@ def encode(number, checksum=False, split=0):
 
     check_symbol = ''
     if checksum:
-        check_symbol = encode_symbols[number % check_base]
+        if type(checksum) in int_types:
+            if checksum < 2 or checksum > check_base:
+                raise ValueError("checksum '%d' is out of range 2...%d" % (checksum,check_base))
+        else:
+            checksum = check_base
+        check_symbol = encode_symbols[number % checksum]
 
     if number == 0:
         return '0' + check_symbol
@@ -108,6 +121,9 @@ def decode(symbol_string, checksum=False, strict=False):
     trailing check symbol which will be validated. If the
     checksum validation fails, a ValueError is raised.
 
+    If `checksum` is set to a positive integer, then this integer will be used
+    as divisor. (See `encode` function for details).
+
     If `strict` is set to True, a ValueError is raised if the
     normalization step requires changes to the string.
 
@@ -122,8 +138,13 @@ def decode(symbol_string, checksum=False, strict=False):
         number = number * base + decode_symbols[symbol]
 
     if checksum:
+        if type(checksum) in int_types:
+            if checksum < 2 or checksum > check_base:
+                raise ValueError("checksum '%d' is out of range 2...%d" % (checksum,2,check_base))
+        else:
+            checksum = check_base    
         check_value = decode_symbols[check_symbol]
-        modulo = number % check_base
+        modulo = number % checksum
         if check_value != modulo:
             raise ValueError("invalid check symbol '%s' for string '%s'" %
                              (check_symbol, symbol_string))

@@ -61,12 +61,13 @@ def encode(number, checksum=False, split=0):
 
     A ValueError is raised on invalid input.
 
-    If checksum is set to True, a check symbol will be
+    If `checksum` is set to True, a check symbol will be
     calculated and appended to the string.
 
-    If split is specified, the string will be divided into
-    clusters of that size separated by hyphens.
 
+    If `split` is specified, the string will be divided into
+    clusters of that size separated by hyphens.
+    
     The encoded string is returned.
     """
     number = int(number)
@@ -103,11 +104,11 @@ def encode(number, checksum=False, split=0):
 def decode(symbol_string, checksum=False, strict=False):
     """Decode an encoded symbol string.
 
-    If checksum is set to True, the string is assumed to have a
+    If `checksum` is set to True, the string is assumed to have a
     trailing check symbol which will be validated. If the
     checksum validation fails, a ValueError is raised.
 
-    If strict is set to True, a ValueError is raised if the
+    If `strict` is set to True, a ValueError is raised if the
     normalization step requires changes to the string.
 
     The decoded string is returned.
@@ -146,7 +147,7 @@ def normalize(symbol_string, strict=False):
     A ValueError is raised if the normalized string contains
     invalid characters.
 
-    If the strict parameter is set to True, a ValueError is raised
+    If the `strict` parameter is set to True, a ValueError is raised
     if any of the above transformations are applied.
 
     The normalized string is returned.
